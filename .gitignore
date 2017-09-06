@@ -1,0 +1,6 @@
+reshaped.csv
+submission.csv
+submission_*.csv
+test.csv
+train.csv
+model/*
