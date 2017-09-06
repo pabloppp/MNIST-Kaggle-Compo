@@ -61,7 +61,7 @@ def calculate_gradients(x, a, y, m):
     return dw.T, db
 
 
-def back_propagation(w, b, dw, db, learning_rate=0.001):
+def back_propagation(w, b, dw, db, learning_rate=0.01):
     w = w - learning_rate * dw
     b = b - learning_rate * db
     return w, b
@@ -106,6 +106,12 @@ for i in range(8000):
 
         # print(A1[:, [0]])
 
+plt.figure()
 plt.plot(costs)  # plott cost fn
-plt.plot(accuracies)  # plott cost fn
+plt.legend(['cost'])
+
+plt.figure()
+plt.plot(accuracies)  # plott accuracy fn
+plt.legend(['accuracy'])
+
 plt.show()
