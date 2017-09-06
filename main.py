@@ -61,7 +61,7 @@ def calculate_gradients(x, a, y, m):
     return dw.T, db
 
 
-def back_propagation(w, b, dw, db, learning_rate=0.0001):
+def back_propagation(w, b, dw, db, learning_rate=0.001):
     w = w - learning_rate * dw
     b = b - learning_rate * db
     return w, b
