@@ -80,7 +80,7 @@ batch_count = X_train.shape[1] // batch_size
 costs = []
 accuracies = []
 
-for i in range(8000):
+for i in range(16000):
     batch_index_start = (i % batch_count) * batch_size
     batch_index_end = batch_index_start + batch_size
     X_batch = X_train[:, batch_index_start:batch_index_end]
