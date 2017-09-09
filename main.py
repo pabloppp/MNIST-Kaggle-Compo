@@ -32,16 +32,16 @@ input_layer_dims = X.shape[0]
 output_layer_dims = Y.shape[0]
 
 # SIMPLE LOGISTIC REGRESSION
-parameters = nn.initialize_parameters([input_layer_dims, 250, 64, output_layer_dims])
+parameters = nn.initialize_parameters([input_layer_dims, 249, 171, 63, 25, output_layer_dims])
 costs = []
 accuracies = []
 
 print("Shape of W1", parameters["W1"].shape)
 print("Shape of b1", parameters["b1"].shape)
 
-learning_rate = 0.3
+learning_rate = 0.1
 epoch_size = 200
-batch_size = 10500  # 4 mini batches for the full test data
+batch_size = 5250  # 8 mini batches for the full test data
 batch_count = X_train.shape[1] // batch_size
 
 for i in range(4000):
