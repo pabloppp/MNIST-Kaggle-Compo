@@ -39,7 +39,7 @@ accuracies = []
 print("Shape of W1", parameters["W1"].shape)
 print("Shape of b1", parameters["b1"].shape)
 
-learning_rate = 0.1
+learning_rate = 0.3
 epoch_size = 200
 batch_size = 10500  # 4 mini batches for the full test data
 batch_count = X_train.shape[1] // batch_size
@@ -72,6 +72,18 @@ for i in range(4000):
         print("Accuracy:", accuracy)
         print("--------")
 
+compo_data = pd.read_csv("test.csv").as_matrix().T
+X_compo = compo_data / 255
+print("X_compo", X_compo.shape)
+
+prediction = nn.predict(X_compo, parameters)
+
+df = pd.DataFrame(prediction.T, columns=['Label'])
+df.index += 1
+df.to_csv('submission.csv', index=True, index_label='ImageId')
+
+print("DONE!")
+
 plt.figure()
 plt.plot(costs)  # plott cost fn
 plt.legend(['cost'])
@@ -81,47 +93,3 @@ plt.plot(accuracies)  # plott accuracy fn
 plt.legend(['accuracy'])
 
 plt.show()
-
-
-# epoch_size = 100
-# batch_size = 10500  # 4 mini batches for the full test data
-# batch_count = X_train.shape[1] // batch_size
-#
-# costs = []
-# accuracies = []
-#
-# for i in range(20000):
-#     batch_index_start = (i % batch_count) * batch_size
-#     batch_index_end = batch_index_start + batch_size
-#     X_batch = X_train[:, batch_index_start:batch_index_end]
-#     Y_batch = Y_train[:, batch_index_start:batch_index_end]
-#     A1 = forward_propagation(X_batch, W1, b1)
-#     # print("Shape of A1", A1.shape)
-#     L = calculate_loss(A1, Y_batch, m_train)
-#     cost = np.squeeze(np.sum(L) / 10)
-#     costs.append(cost)
-#     dW1, db1 = calculate_gradients(X_batch, A1, Y_batch, m_train)
-#     # print("Gradients - dw:", dW1.shape, "db:", db1.shape)
-#     W1, b1 = back_propagation(W1, b1, dW1, db1)
-#     if i % epoch_size == 0:
-#         print("IT:", i)
-#         print("Cost", cost)
-#         P = predict(X_test, W1, b1)
-#
-#         print(P[:, :20])
-#         print(Y_raw_test[:, :20])
-#         accuracy = np.sum(P == Y_raw_test) / P.shape[1]
-#         accuracies.append(accuracy)
-#         print("Accuracy:", accuracy)
-#
-#         # print(A1[:, [0]])
-#
-# compo_data = pd.read_csv("test.csv").as_matrix().T
-# X_compo = compo_data / 255
-# print("X_compo", X_compo.shape)
-#
-# P = predict(X_compo, W1, b1)
-#
-# df = pd.DataFrame(P.T, columns=['Label'])
-# df.index += 1
-# df.to_csv('submission.csv', index=True, index_label='ImageId')
