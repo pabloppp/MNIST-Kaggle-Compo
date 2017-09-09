@@ -32,7 +32,7 @@ input_layer_dims = X.shape[0]
 output_layer_dims = Y.shape[0]
 
 # SIMPLE LOGISTIC REGRESSION
-parameters = nn.initialize_parameters([input_layer_dims, 64, 32, 32, output_layer_dims])
+parameters = nn.initialize_parameters([input_layer_dims, 250, 64, 32, output_layer_dims])
 costs = []
 accuracies = []
 
