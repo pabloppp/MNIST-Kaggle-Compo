@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import deep_nn as nn
 
 np.random.seed(21071969)
 
@@ -27,84 +28,49 @@ assert (Y.shape == (10, 42000))  # the output is a single label from 0 to 9
 # print(Y_raw[:, :5])
 # print(Y[:, :5])
 
+input_layer_dims = X.shape[0]
+output_layer_dims = Y.shape[0]
 
 # SIMPLE LOGISTIC REGRESSION
-W1 = np.random.randn(Y.shape[0], X.shape[0]) * 0.001
-b1 = np.zeros((Y.shape[0], 1))
-
-print("Shape of W1", W1.shape)
-print("Shape of b1", b1.shape)
-assert (W1.shape == (10, 784))
-assert (b1.shape == (10, 1))
-
-
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
-
-
-def forward_propagation(x, w, b):
-    z = np.dot(w, x) + b
-    a = sigmoid(z)
-    return a
-
-
-def calculate_loss(a, y, m):
-    first = np.multiply(y, np.log(a))
-    second = np.multiply(1 - y, np.log(1 - a))
-    l = - (1 / m) * np.sum(first + second, axis=1, keepdims=True)
-    return l
-
-
-def calculate_gradients(x, a, y, m):
-    dw = (1 / m) * np.dot(x, (a - y).T)
-    db = (1 / m) * np.sum(a - y, axis=1, keepdims=True)
-    return dw.T, db
-
-
-def back_propagation(w, b, dw, db, learning_rate=0.1):
-    w = w - learning_rate * dw
-    b = b - learning_rate * db
-    return w, b
-
-
-def predict(x, w, b):
-    a = forward_propagation(x, w, b)
-    prediction = np.argmax(a, axis=0).reshape(1, a.shape[1])
-    return prediction
-
-
-epoch_size = 100
-batch_size = 10500  # 4 mini batches for the full test data
-batch_count = X_train.shape[1] // batch_size
-
+parameters = nn.initialize_parameters([input_layer_dims, 64, 32, 32, output_layer_dims])
 costs = []
 accuracies = []
 
-for i in range(16000):
+print("Shape of W1", parameters["W1"].shape)
+print("Shape of b1", parameters["b1"].shape)
+
+learning_rate = 0.01
+epoch_size = 200
+batch_size = 10500  # 4 mini batches for the full test data
+batch_count = X_train.shape[1] // batch_size
+
+for i in range(4000):
+    # Generate minibatch
     batch_index_start = (i % batch_count) * batch_size
     batch_index_end = batch_index_start + batch_size
     X_batch = X_train[:, batch_index_start:batch_index_end]
     Y_batch = Y_train[:, batch_index_start:batch_index_end]
-    A1 = forward_propagation(X_batch, W1, b1)
-    # print("Shape of A1", A1.shape)
-    L = calculate_loss(A1, Y_batch, m_train)
-    cost = np.squeeze(np.sum(L) / 10)
+    # forward propagation
+    AL, caches = nn.L_model_forward(X_batch, parameters)
+    # calculate costs
+    cost = nn.compute_cost(AL, Y_batch)
     costs.append(cost)
-    dW1, db1 = calculate_gradients(X_batch, A1, Y_batch, m_train)
-    # print("Gradients - dw:", dW1.shape, "db:", db1.shape)
-    W1, b1 = back_propagation(W1, b1, dW1, db1)
+    # backward propagation
+    grads = nn.L_model_backward(AL, Y_batch, caches)
+    # update props
+    parameters = nn.update_parameters(parameters, grads, learning_rate)
+
+    # epoch
     if i % epoch_size == 0:
-        print("IT:", i)
-        print("Cost", cost)
-        P = predict(X_test, W1, b1)
-
-        print(P[:, :20])
+        print("Iteration", i)
+        prediction = nn.predict(X_test, parameters)
+        print(prediction[:, :20])
         print(Y_raw_test[:, :20])
-        accuracy = np.sum(P == Y_raw_test) / P.shape[1]
+        accuracy = np.sum(prediction == Y_raw_test) / prediction.shape[1]
         accuracies.append(accuracy)
+        print("Cost:", cost)
         print("Accuracy:", accuracy)
-
-        # print(A1[:, [0]])
+        print("--------")
 
 plt.figure()
 plt.plot(costs)  # plott cost fn
@@ -115,3 +81,47 @@ plt.plot(accuracies)  # plott accuracy fn
 plt.legend(['accuracy'])
 
 plt.show()
+
+
+# epoch_size = 100
+# batch_size = 10500  # 4 mini batches for the full test data
+# batch_count = X_train.shape[1] // batch_size
+#
+# costs = []
+# accuracies = []
+#
+# for i in range(20000):
+#     batch_index_start = (i % batch_count) * batch_size
+#     batch_index_end = batch_index_start + batch_size
+#     X_batch = X_train[:, batch_index_start:batch_index_end]
+#     Y_batch = Y_train[:, batch_index_start:batch_index_end]
+#     A1 = forward_propagation(X_batch, W1, b1)
+#     # print("Shape of A1", A1.shape)
+#     L = calculate_loss(A1, Y_batch, m_train)
+#     cost = np.squeeze(np.sum(L) / 10)
+#     costs.append(cost)
+#     dW1, db1 = calculate_gradients(X_batch, A1, Y_batch, m_train)
+#     # print("Gradients - dw:", dW1.shape, "db:", db1.shape)
+#     W1, b1 = back_propagation(W1, b1, dW1, db1)
+#     if i % epoch_size == 0:
+#         print("IT:", i)
+#         print("Cost", cost)
+#         P = predict(X_test, W1, b1)
+#
+#         print(P[:, :20])
+#         print(Y_raw_test[:, :20])
+#         accuracy = np.sum(P == Y_raw_test) / P.shape[1]
+#         accuracies.append(accuracy)
+#         print("Accuracy:", accuracy)
+#
+#         # print(A1[:, [0]])
+#
+# compo_data = pd.read_csv("test.csv").as_matrix().T
+# X_compo = compo_data / 255
+# print("X_compo", X_compo.shape)
+#
+# P = predict(X_compo, W1, b1)
+#
+# df = pd.DataFrame(P.T, columns=['Label'])
+# df.index += 1
+# df.to_csv('submission.csv', index=True, index_label='ImageId')
