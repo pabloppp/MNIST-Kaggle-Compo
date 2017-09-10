@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import deep_nn as nn
+import time
 
 np.random.seed(21071969)
 
@@ -10,12 +11,14 @@ X = ground_truth[1:] / 255
 Y_raw = ground_truth[:1]
 Y = np.eye(10)[Y_raw.reshape(-1)].T  # .map()
 
-X_train = X[:, :33600]
-Y_train = Y[:, :33600]
+train_set_size = 33600
 
-X_test = X[:, 33600:]
-Y_test = Y[:, 33600:]
-Y_raw_test = Y_raw[:, 33600:]
+X_train = X[:, :train_set_size]
+Y_train = Y[:, :train_set_size]
+
+X_test = X[:, train_set_size:]
+Y_test = Y[:, train_set_size:]
+Y_raw_test = Y_raw[:, train_set_size:]
 
 m = Y.shape[1]
 m_train = Y_test.shape[1]
@@ -41,8 +44,10 @@ print("Shape of b1", parameters["b1"].shape)
 
 learning_rate = 0.1
 epoch_size = 200
-batch_size = 5250  # 8 mini batches for the full test data
+batch_size = train_set_size // 8  # mini batches for the full test data
 batch_count = X_train.shape[1] // batch_size
+
+last_epoch_time = time.time()
 
 for i in range(4000):
     # Generate minibatch
@@ -63,9 +68,13 @@ for i in range(4000):
     # epoch
     if i % epoch_size == 0:
         print("Iteration", i)
+        elapsed_time = time.time() - last_epoch_time
+        print("Elapsed time since las epoch", "{0:.2f}".format(elapsed_time) + "s",
+              "(" + "{0:.2f}".format(elapsed_time / epoch_size) + "s/iter)")
+        last_epoch_time = time.time()
         prediction = nn.predict(X_test, parameters)
-        print(prediction[:, :20])
-        print(Y_raw_test[:, :20])
+        print(prediction[:, :30])
+        print(Y_raw_test[:, :30])
         accuracy = np.sum(prediction == Y_raw_test) / prediction.shape[1]
         accuracies.append(accuracy)
         print("Cost:", cost)
