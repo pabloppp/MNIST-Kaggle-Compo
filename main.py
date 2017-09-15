@@ -11,10 +11,11 @@ X = ground_truth[1:] / 255
 Y_raw = ground_truth[:1]
 Y = np.eye(10)[Y_raw.reshape(-1)].T  # .map()
 
-train_set_size = 40000
+train_set_size = 41000
 
 X_train = X[:, :train_set_size]
 Y_train = Y[:, :train_set_size]
+Y_raw_train = Y_raw[:, :train_set_size]
 
 X_test = X[:, train_set_size:]
 Y_test = Y[:, train_set_size:]
@@ -35,14 +36,16 @@ input_layer_dims = X.shape[0]
 output_layer_dims = Y.shape[0]
 
 # SIMPLE LOGISTIC REGRESSION
-parameters = nn.initialize_parameters([input_layer_dims, 799, 299, output_layer_dims])
+parameters = nn.initialize_parameters([input_layer_dims, 800, 300, output_layer_dims])
 costs = []
-accuracies = []
+accuracies_train = []
+accuracies_test = []
 
 print("Shape of W1", parameters["W1"].shape)
 print("Shape of b1", parameters["b1"].shape)
 
 learning_rate = 0.04
+L2_lambd = 4
 epoch_size = 200
 batch_size = train_set_size // 200  # mini batches for the full test data
 batch_count = X_train.shape[1] // batch_size
@@ -52,7 +55,7 @@ print("batch_count", batch_count)
 
 last_epoch_time = time.time()
 
-for i in range(30000):
+for i in range(5000):
     # Generate minibatch
     batch_index_start = (i % batch_count) * batch_size
     batch_index_end = batch_index_start + batch_size
@@ -61,10 +64,13 @@ for i in range(30000):
     # forward propagation
     AL, caches = nn.L_model_forward(X_batch, parameters)
     # calculate costs
-    cost = nn.compute_cost(AL, Y_batch)
+    if L2_lambd == 0:
+        cost = nn.compute_cost(AL, Y_batch)
+    else:
+        cost = nn.compute_cost_with_regularization(AL, Y_batch, parameters, L2_lambd)
     costs.append(cost)
     # backward propagation
-    grads = nn.L_model_backward(AL, Y_batch, caches)
+    grads = nn.L_model_backward(AL, Y_batch, caches, L2_lambd)
     # update props
     parameters = nn.update_parameters(parameters, grads, learning_rate)
 
@@ -75,13 +81,16 @@ for i in range(30000):
         print("Elapsed time since las epoch", "{0:.2f}".format(elapsed_time) + "s",
               "(" + "{0:.2f}".format(elapsed_time / epoch_size) + "s/iter)")
         last_epoch_time = time.time()
-        prediction = nn.predict(X_test, parameters)
-        print(prediction[:, :30])
+        prediction_test = nn.predict(X_test, parameters)
+        prediction_train = nn.predict(X_train, parameters)
+        print(prediction_test[:, :30])
         print(Y_raw_test[:, :30])
-        accuracy = np.sum(prediction == Y_raw_test) / prediction.shape[1]
-        accuracies.append(accuracy)
+        accuracy_test = np.sum(prediction_test == Y_raw_test) / prediction_test.shape[1]
+        accuracies_test.append(accuracy_test)
+        accuracy_train = np.sum(prediction_train == Y_raw_train) / prediction_train.shape[1]
+        accuracies_train.append(accuracy_train)
         print("Cost:", cost)
-        print("Accuracy:", accuracy)
+        print("Accuracy test:", accuracy_test, "train:", accuracy_train)
         print("--------")
 
 compo_data = pd.read_csv("test.csv").as_matrix().T
@@ -101,7 +110,8 @@ plt.plot(costs)  # plott cost fn
 plt.legend(['cost'])
 
 plt.figure()
-plt.plot(accuracies)  # plott accuracy fn
-plt.legend(['accuracy'])
+plt.plot(accuracies_train)  # plott accuracy fn
+plt.plot(accuracies_test)  # plott accuracy fn
+plt.legend(['accuracy train', 'accuracy test'])
 
 plt.show()
