@@ -11,7 +11,7 @@ X = ground_truth[1:] / 255
 Y_raw = ground_truth[:1]
 Y = np.eye(10)[Y_raw.reshape(-1)].T  # .map()
 
-train_set_size = 41000
+train_set_size = 38000
 
 X_train = X[:, :train_set_size]
 Y_train = Y[:, :train_set_size]
@@ -36,7 +36,7 @@ input_layer_dims = X.shape[0]
 output_layer_dims = Y.shape[0]
 
 # SIMPLE LOGISTIC REGRESSION
-parameters = nn.initialize_parameters([input_layer_dims, 800, 300, output_layer_dims])
+parameters = nn.initialize_parameters([input_layer_dims, 1200, 700, output_layer_dims])
 costs = []
 accuracies_train = []
 accuracies_test = []
@@ -45,7 +45,7 @@ print("Shape of W1", parameters["W1"].shape)
 print("Shape of b1", parameters["b1"].shape)
 
 learning_rate = 0.04
-L2_lambd = 4
+L2_lambd = 0.7
 epoch_size = 200
 batch_size = train_set_size // 200  # mini batches for the full test data
 batch_count = X_train.shape[1] // batch_size
@@ -55,7 +55,7 @@ print("batch_count", batch_count)
 
 last_epoch_time = time.time()
 
-for i in range(5000):
+for i in range(30000):
     # Generate minibatch
     batch_index_start = (i % batch_count) * batch_size
     batch_index_end = batch_index_start + batch_size
