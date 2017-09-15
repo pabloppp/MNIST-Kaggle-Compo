@@ -11,7 +11,7 @@ X = ground_truth[1:] / 255
 Y_raw = ground_truth[:1]
 Y = np.eye(10)[Y_raw.reshape(-1)].T  # .map()
 
-train_set_size = 33600
+train_set_size = 40000
 
 X_train = X[:, :train_set_size]
 Y_train = Y[:, :train_set_size]
